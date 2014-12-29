@@ -28,11 +28,9 @@ function healthBarProto:OnCreate(name, unit, order)
 
 	self.gradient = { 1, 0, 0, 1, 1, 0, 0, 1, 0 }
 	self.unit = unit
-	self.showInCombat = true
 	self.showBelow = 0.9
 	self.order = order
 	self.UnitNameText = true
-	self.PercentText = true
 	self.CurrentText = true
 
 	self:Hook('OnEnable', function(self)
@@ -71,8 +69,64 @@ function healthBarProto:UNIT_HEALTH_MAX(event, unit)
 	return self:UpdateMinMax()
 end
 
-local playerHealth = healthBarClass:Create("PlayerHealth", "player", -10)
-addon:RegisterBar(playerHealth)
+healthBarClass:Create("PlayerHealth", "player", -10)
+healthBarClass:Create("PetHealth", "pet", -20)
 
-local petHealth = healthBarClass:Create("PetHealth", "pet", -20)
-addon:RegisterBar(petHealth)
+local powerBarClass, powerBarProto = addon.BarClass:SubClass()
+
+function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
+	self.super.OnCreate(self, name)
+
+	local pwb = PowerBarColor[power]
+	self.color = { pwb.r, pwb.g, pwb.b }
+	self.unit = unit
+	self.power = power
+	self.powerIndex = powerIndex or _G['SPELL_POWER_'..power]
+	self.showInCombat = true
+	self.showBelow = 0.9
+	self.order = order
+	self.CurrentText = true
+
+	self:Hook('OnEnable', function(self)
+		self:RegisterUnitEvent('UNIT_POWER', self.unit)
+		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
+	end)
+	self:Hook('OnDisable', function(self)
+		self:UnregisterEvent('UNIT_POWER', self.unit)
+		self:UnregisterEvent('UNIT_POWER_MAX', self.unit)
+	end)
+
+	self:Hook('OnShow', function(self)
+		self:RegisterUnitEvent('UNIT_POWER_FREQUENT', self.unit)
+	end)
+	self:Hook('OnHide', function(self)
+		self:UnregisterEvent('UNIT_POWER_FREQUENT')
+	end)
+end
+
+function powerBarProto:IsAvailable()
+	return self.super.IsAvailable(self) and UnitPower(self.unit, self.powerIndex) > 0
+end
+
+function powerBarProto:GetCurrent()
+	return UnitPower(self.unit, self.powerIndex)
+end
+
+function powerBarProto:GetMinMax()
+	return 0, UnitPowerMax(self.unit, self.powerIndex)
+end
+
+function powerBarProto:UNIT_POWER(event, unit, power)
+	if power and power ~= self.power then return end
+	self:Debug('UNIT_POWER', event, unit, power, self.unit, self.power)
+	return self:UpdateCurrent()
+end
+powerBarProto.UNIT_POWER_FREQUENT = powerBarProto.UNIT_POWER
+
+function powerBarProto:UNIT_POWER_MAX(event, unit, power)
+	if power and power ~= self.power then return end
+	self:Debug('UNIT_POWER_MAX', event, unit, power, self.unit, self.power)
+	return self:UpdateMinMax()
+end
+
+powerBarClass:Create("Focus", "player", 10, "FOCUS")

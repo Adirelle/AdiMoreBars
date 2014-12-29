@@ -39,6 +39,12 @@ libs\LibDualSpec-1.0\LibDualSpec-1.0.lua
 libs\LibSharedMedia-3.0\lib.xml
 #@end-no-lib-strip@
 
+utils\Debug.lua
+utils\Gradients.lua
+utils\LSM.lua
+utils\Events.lua
+utils\Init.lua
+
 Core.lua
 Widget.lua
 Layout.lua

@@ -24,6 +24,8 @@ local addonName, addon = ...
 local LSM = LibStub('LibSharedMedia-3.0')
 
 local BORDER_SIZE = 2
+local PADDING = 2
+
 local BAR_BACKDROP = {
 	bgFile = [[Interface\Tooltips\UI-Tooltip-Background]],
 	tile = true,
@@ -49,6 +51,7 @@ function barClass:Create(name, ...)
 	local frame = CreateFrame("StatusBar", addonName..name, addon.Anchor)
 	setmetatable(frame, self)
 	frame:OnCreate(name, ...)
+	addon:RegisterBar(frame)
 	return frame
 end
 
@@ -90,9 +93,7 @@ function barProto:OnCreate(name)
 	self:SetBackdropColor(0, 0, 0, 1)
 	self:SetBackdropBorderColor(0, 0, 0, 0)
 
-	LSM.RegisterCallback(self, "LibSharedMedia_SetGlobal", "UpdateTexture")
-	LSM.RegisterCallback(self, "LibSharedMedia_Registered", "UpdateTexture")
-	self:UpdateTexture()
+	self.UpdateTexture = addon:RegisterLSMCallback(self, "statusbar", "SetTexture")
 
 	local border = CreateFrame("Frame", nil, self)
 	border:SetWidth(width+BORDER_SIZE*2)
@@ -108,42 +109,65 @@ function barProto:GetDB()
 	return addon.db.profile.bars[self:GetName()]
 end
 
+local function SetFont(fontstring, fontFile)
+	fontstring:SetFont(fontFile, 13, "")
+	fontstring:SetShadowColor(0, 0, 0, 1)
+	fontstring:SetShadowOffset(1, -1)
+end
+
 function barProto:OnInitialize()
 	self:Debug('OnInitialize')
-	
+
 	if self.UnitNameText and self.unit then
-		local text = self:CreateFontString(self:GetName().."UnitName", "ARTWORK", "GameFontWhite")
-		text:SetPoint("LEFT")
+		local text = self:CreateFontString(self:GetName().."UnitName", "ARTWORK")
+		text:SetPoint("LEFT", PADDING, 0)
+		addon:RegisterLSMCallback(text, "font", SetFont)
 		self.UnitNameText = text
 	else
 		self.UnitNameText = nil
 	end
-	
+
+	if self.MaximumText then
+		local text = self:CreateFontString(self:GetName().."Maximum", "ARTWORK")
+		text:SetPoint("RIGHT", -PADDING, 0)
+		addon:RegisterLSMCallback(text, "font", SetFont)
+		self.MaximumText = text
+	end
+
+	if self.CurrentText or self.MaximumText then
+		local text = self:CreateFontString(self:GetName().."Current", "ARTWORK")
+		if self.MaximumText then
+			text:SetPoint("RIGHT", self.MaximumText, "LEFT")
+		else
+			text:SetPoint("RIGHT", -PADDING, 0)
+		end
+		addon:RegisterLSMCallback(text, "font", SetFont)
+		self.CurrentText = text
+	end
+
 	if self.PercentText then
-		local text = self:CreateFontString(self:GetName().."Percent", "ARTWORK", "NumberFontNormal")
-		text:SetPoint("CENTER")
+		local text = self:CreateFontString(self:GetName().."Percent", "ARTWORK")
+		if self.CurrentText then
+			text:SetPoint("CENTER")
+		else
+			text:SetPoint("RIGHT", -PADDING, 0)
+		end
+		addon:RegisterLSMCallback(text, "font", SetFont)
 		self.PercentText = text
 	end
 
-	if self.CurrentText or self.FractionText then
-		local text = self:CreateFontString(self:GetName().."Current", "ARTWORK", "NumberFontNormal")
-		text:SetPoint("RIGHT")
-		self.CurrentText = self.CurrentText and text or nil
-		self.FractionText = self.FractionText and text or nil
-	end
-	
 	if self.showBelow then
 		if self.showBelow >= 0.0 and self.showBelow <= 1.0 then
 			self:Hook('CheckVisibility', function()
 				if self:GetPercent() < self.showBelow then
-					self.shouldShow = true 
+					self.shouldShow = true
 				end
 			end)
 			self:Hook('UpdateMinMax', self.UpdateVisibility)
 		else
 			self:Hook('CheckVisibility', function()
 				if self:GetCurrent() < self.showBelow then
-					self.shouldShow = true 
+					self.shouldShow = true
 				end
 			end)
 		end
@@ -209,16 +233,29 @@ function barProto:OnHide()
 	addon:UpdateLayout()
 end
 
+local function SmartValue(value)
+	if value >= 10000000 then
+		return format("%.1fm", value/1000000)
+	elseif value >= 10000 then
+		return format("%.1fk", value/1000)
+	else
+		return tostring(value)
+	end
+end
+
 function barProto:OnValueChanged(value)
 	self:Debug('OnValueChanged', value)
 	if self.CurrentText then
-		self.CurrentText:SetFormattedText("%d", value)
-	end	
+		self.CurrentText:SetText(SmartValue(value))
+	end
 	self:UpdatePercent()
 end
 
 function barProto:OnMinMaxChanged(mini, maxi)
 	self:Debug('OnMinMaxChanged', mini, maxi)
+	if self.MaximumText then
+		self.MaximumText:SetText(" / "..SmartValue(maxi))
+	end
 	self:UpdatePercent()
 end
 
@@ -242,11 +279,8 @@ function barProto:GetPercent()
 	return 0
 end
 
-function barProto:UpdateTexture(mediatype)
-	if mediatype and mediatype ~= "statusbar" then
-		return
-	end
-	self:SetStatusBarTexture(LSM:Fetch("statusbar"))
+function barProto:SetTexture(texture)
+	self:SetStatusBarTexture(texture)
 	self:UpdateColor()
 end
 
@@ -261,7 +295,7 @@ end
 
 function barProto:UpdateName()
 	if self.UnitNameText then
-		self.UnitNameText:SetText(UnitName(self.unit)) 
+		self.UnitNameText:SetText(UnitName(self.unit))
 	end
 end
 barProto.UNIT_NAME = barProto.UpdateName
