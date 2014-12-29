@@ -77,8 +77,6 @@ local powerBarClass, powerBarProto = addon.BarClass:SubClass()
 function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	self.super.OnCreate(self, name)
 
-	local pwb = PowerBarColor[power]
-	self.color = { pwb.r, pwb.g, pwb.b }
 	self.unit = unit
 	self.power = power
 	self.powerIndex = powerIndex or _G['SPELL_POWER_'..power]
@@ -87,6 +85,10 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	self.order = order
 	self.CurrentText = true
 
+	local pbc = PowerBarColor[power] or PowerBarColor[self.powerIndex]
+	if pbc then
+		self.color = { pbc.r, pbc.g, pbc.b }
+	end
 	self:Hook('OnEnable', function(self)
 		self:RegisterUnitEvent('UNIT_POWER', self.unit)
 		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
