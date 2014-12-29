@@ -333,6 +333,10 @@ function barProto:CheckVisibility()
 		self:Debug('CheckVisibility', self:GetPercent(), 'below', self.showBelow)
 		return true
 	end
+	if self.showAbove and self:GetCurrent() > self.showAbove then
+		self:Debug('CheckVisibility', self:GetCurrent(), 'above', self.showAbove)
+		return true
+	end
 	self:Debug('CheckVisibility', 'nothing')
 	return false
 end
@@ -350,7 +354,9 @@ function barProto:UpdateCurrent()
 	if self._current == current then return end
 	self._current = current
 	self:SetValue(current)
+	if self.showAbove or self.showBelow then
 		self:UpdateVisibility()
+	end
 	self:UpdatePercent()
 end
 
