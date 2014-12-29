@@ -107,7 +107,7 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 end
 
 function powerBarProto:IsAvailable()
-	return self.super.IsAvailable(self) and UnitPower(self.unit, self.powerIndex) > 0
+	return self.super.IsAvailable(self) and UnitPowerMax(self.unit, self.powerIndex) > 0
 end
 
 function powerBarProto:GetCurrent()
