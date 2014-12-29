@@ -156,24 +156,6 @@ function barProto:OnInitialize()
 		self.PercentText = text
 	end
 
-	if self.showBelow then
-		if self.showBelow >= 0.0 and self.showBelow <= 1.0 then
-			self:Hook('CheckVisibility', function()
-				if self:GetPercent() < self.showBelow then
-					self.shouldShow = true
-				end
-			end)
-			self:Hook('UpdateMinMax', self.UpdateVisibility)
-		else
-			self:Hook('CheckVisibility', function()
-				if self:GetCurrent() < self.showBelow then
-					self.shouldShow = true
-				end
-			end)
-		end
-		self:Hook('UpdateCurrent', self.UpdateVisibility)
-	end
-
 	if self:GetDB().enabled then
 		self:Enable()
 	else
@@ -299,10 +281,7 @@ end
 barProto.UNIT_NAME = barProto.UpdateName
 
 function barProto:UpdateVisibility()
-	self.shouldShow = false
-	if self:IsAvailable() then
-		self:CheckVisibility()
-	end
+	self.shouldShow = self:IsAvailable() and self:CheckVisibility()
 	self:Debug('UpdateVisibility', self.shouldShow)
 	if self.shouldShow and not self:IsShown() then
 		self:Show()
@@ -346,10 +325,16 @@ function barProto:OnUpdate(elapsed)
 end
 
 function barProto:CheckVisibility()
-	-- Hide
 	if self.showInCombat and self.inCombat then
-		self.shouldShow = true
+		self:Debug('CheckVisibility', inCombat)
+		return true
 	end
+	if self.showBelow and self:GetPercent() < self.showBelow then
+		self:Debug('CheckVisibility', self:GetPercent(), 'below', self.showBelow)
+		return true
+	end
+	self:Debug('CheckVisibility', 'nothing')
+	return false
 end
 
 function barProto:FullUpdate()
@@ -365,6 +350,7 @@ function barProto:UpdateCurrent()
 	if self._current == current then return end
 	self._current = current
 	self:SetValue(current)
+		self:UpdateVisibility()
 	self:UpdatePercent()
 end
 
@@ -374,6 +360,9 @@ function barProto:UpdateMinMax()
 	self._mini, self._maxi = mini, maxi
 	self:SetMinMaxValues(mini, maxi)
 	self:UpdatePercent()
+	if self.showBelow then
+		self:UpdateVisibility()
+	end
 end
 
 function barProto:UpdatePercent()
