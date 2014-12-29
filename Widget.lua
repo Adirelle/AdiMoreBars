@@ -381,8 +381,4 @@ function barProto:UpdatePercent()
 	if self.PercentText then
 		self.PercentText:SetFormattedText("%d%%", floor(percent*100+0.5))
 	end
-	if self.FractionText then
-		local _, maxi = self:GetMinMax()
-		self.FractionText:SetFormattedText("%d / %d", self:GetCurrent(), maxi)
-	end
 end
