@@ -119,7 +119,7 @@ function barProto:OnInitialize()
 	self:Debug('OnInitialize')
 
 	if self.UnitNameText and self.unit then
-		local text = self:CreateFontString(self:GetName().."UnitName", "ARTWORK")
+		local text = self:CreateFontString(self:GetName().."UnitName", "OVERLAY")
 		text:SetPoint("LEFT", PADDING, 0)
 		addon:RegisterLSMCallback(text, "font", SetFont)
 		self.UnitNameText = text
@@ -128,14 +128,14 @@ function barProto:OnInitialize()
 	end
 
 	if self.MaximumText then
-		local text = self:CreateFontString(self:GetName().."Maximum", "ARTWORK")
+		local text = self:CreateFontString(self:GetName().."Maximum", "OVERLAY")
 		text:SetPoint("RIGHT", -PADDING, 0)
 		addon:RegisterLSMCallback(text, "font", SetFont)
 		self.MaximumText = text
 	end
 
 	if self.CurrentText or self.MaximumText then
-		local text = self:CreateFontString(self:GetName().."Current", "ARTWORK")
+		local text = self:CreateFontString(self:GetName().."Current", "OVERLAY")
 		if self.MaximumText then
 			text:SetPoint("RIGHT", self.MaximumText, "LEFT")
 		else
@@ -146,7 +146,7 @@ function barProto:OnInitialize()
 	end
 
 	if self.PercentText then
-		local text = self:CreateFontString(self:GetName().."Percent", "ARTWORK")
+		local text = self:CreateFontString(self:GetName().."Percent", "OVERLAY")
 		if self.CurrentText then
 			text:SetPoint("CENTER")
 		else

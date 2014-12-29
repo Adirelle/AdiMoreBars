@@ -113,6 +113,14 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	end
 end
 
+function powerBarProto:OnInitialize()
+	self.super.OnInitialize(self)
+
+	if self.segmented then
+		self.Separators = {}
+	end
+end
+
 function powerBarProto:IsAvailable()
 	return self.super.IsAvailable(self) and UnitPowerMax(self.unit, self.powerIndex) > 0
 end
@@ -123,6 +131,44 @@ end
 
 function powerBarProto:GetMinMax()
 	return 0, UnitPowerMax(self.unit, self.powerIndex)
+end
+
+function powerBarProto:FullUpdate()
+	self.super.FullUpdate(self)
+	self:UpdateSeparators()
+end
+
+function powerBarProto:OnSizeChanged()
+	self:UpdateSeparators()
+end
+
+function powerBarProto:OnMinMaxChanged(mini, maxi)
+	self.super.OnMinMaxChanged(self, mini, maxi)
+	self:UpdateSeparators()
+end
+
+function powerBarProto:UpdateSeparators()
+	if not self.segmented then return end
+	local separators, segmentSize = self.Separators, self.segmented
+	local mini, maxi = self:GetMinMax()
+	local numSeparators = ceil((maxi-mini) / segmentSize) - 1
+	local width = self:GetWidth() / (numSeparators+1)
+	for i = 1, numSeparators do
+		local separator = separators[i]
+		if not separator then
+			separator = self:CreateTexture(nil, "OVERLAY", nil, -1)
+			separator:SetTexture(0, 0, 0, 1)
+			separator:SetWidth(1)
+			separator:SetPoint("TOP")
+			separator:SetPoint("BOTTOM")
+			separators[i] = separator
+		end
+		separator:SetPoint("LEFT", i * width, 0)
+		separator:Show()
+	end
+	for i = numSeparators+1, #separators do
+		separators[i]:Hide()
+	end
 end
 
 function powerBarProto:UNIT_DISPLAYPOWER()
@@ -163,15 +209,18 @@ elseif IsA("DEATHKNIGHT") then
 
 elseif IsA("PALADIN") then
 	local holyPowerBar = powerBarClass:Create("HolyPower", "player", 20, "HOLY_POWER")
+	holyPowerBar.segmented = 1
 	holyPowerBar.showInCombat = true
 	holyPowerBar.showAbove = 0
 
 elseif IsA("WARLOCK") then
 	local souldShardBar = powerBarClass:Create("SoulShards", "player", 20, "SOUL_SHARDS")
+	souldShardBar.segmented = 1
 	souldShardBar.showInCombat = true
 	souldShardBar.showAbove = 0
 
 	local burningEmberBar = powerBarClass:Create("BurningEmbers", "player", 20, "BURNING_EMBERS")
+	souldShardBar.segmented = 10
 	souldShardBar.showInCombat = true
 	souldShardBar.showAbove = 0
 
@@ -192,12 +241,14 @@ if IsA("DRUID", "WARRIOR") then
 
 elseif IsA("MONK") then
 	local chiBar = powerBarClass:Create("Chi", "player", 30, "CHI")
+	chiBar.segmented = 1
 	chiBar.showAbove = 0
 	chiBar.showInCombat = true
 end
 
 if IsA("DRUID", "ROGUE") then
 	local comboBar = powerBarClass:Create("Combo", "player", 50, "COMBO", 4)
+	comboBar.segmented = 1
 	comboBar.showAbove = 0
 	comboBar.showInCombat = IsA("ROGUE")
 end
