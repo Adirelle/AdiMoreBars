@@ -89,21 +89,24 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	if pbc then
 		self.color = { pbc.r, pbc.g, pbc.b }
 	end
-	self:Hook('OnEnable', function(self)
-		self:RegisterUnitEvent('UNIT_POWER', self.unit)
-		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
-	end)
-	self:Hook('OnDisable', function(self)
-		self:UnregisterEvent('UNIT_POWER', self.unit)
-		self:UnregisterEvent('UNIT_POWER_MAX', self.unit)
-	end)
 
-	self:Hook('OnShow', function(self)
-		self:RegisterUnitEvent('UNIT_POWER_FREQUENT', self.unit)
-	end)
-	self:Hook('OnHide', function(self)
-		self:UnregisterEvent('UNIT_POWER_FREQUENT')
-	end)
+	if power == "COMBO" then
+		self:Hook('OnEnable', function(self)
+			self:RegisterUnitEvent('UNIT_COMBO_POINTS', self.unit)
+		end)
+	else
+		self:Hook('OnEnable', function(self)
+			self:RegisterUnitEvent('UNIT_POWER', self.unit)
+			self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
+			self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
+		end)
+		self:Hook('OnShow', function(self)
+			self:RegisterUnitEvent('UNIT_POWER_FREQUENT', self.unit)
+		end)
+		self:Hook('OnHide', function(self)
+			self:UnregisterEvent('UNIT_POWER_FREQUENT')
+		end)
+	end
 end
 
 function powerBarProto:IsAvailable()
@@ -118,11 +121,16 @@ function powerBarProto:GetMinMax()
 	return 0, UnitPowerMax(self.unit, self.powerIndex)
 end
 
+function powerBarProto:UNIT_DISPLAYPOWER()
+	return self:UpdateVisibility()
+end
+
 function powerBarProto:UNIT_POWER(event, unit, power)
 	if power and power ~= self.power then return end
 	self:Debug('UNIT_POWER', event, unit, power, self.unit, self.power)
 	return self:UpdateCurrent()
 end
+powerBarProto.UNIT_COMBO_POINTS = powerBarProto.UNIT_POWER
 powerBarProto.UNIT_POWER_FREQUENT = powerBarProto.UNIT_POWER
 
 function powerBarProto:UNIT_POWER_MAX(event, unit, power)
