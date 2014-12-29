@@ -248,7 +248,6 @@ function barProto:OnValueChanged(value)
 	if self.CurrentText then
 		self.CurrentText:SetText(SmartValue(value))
 	end
-	self:UpdatePercent()
 end
 
 function barProto:OnMinMaxChanged(mini, maxi)
@@ -256,7 +255,6 @@ function barProto:OnMinMaxChanged(mini, maxi)
 	if self.MaximumText then
 		self.MaximumText:SetText(" / "..SmartValue(maxi))
 	end
-	self:UpdatePercent()
 end
 
 function barProto:IsAvailable()
@@ -363,17 +361,25 @@ function barProto:FullUpdate()
 end
 
 function barProto:UpdateCurrent()
-	self:SetValue(self:GetCurrent())
+	local current = self:GetCurrent()
+	if self._current == current then return end
+	self._current = current
+	self:SetValue(current)
+	self:UpdatePercent()
 end
 
 function barProto:UpdateMinMax()
-	self:SetMinMaxValues(self:GetMinMax())
+	local mini, maxi = self:GetMinMax()
+	if self._mini == mini and self._maxi == maxi then return end
+	self._mini, self._maxi = mini, maxi
+	self:SetMinMaxValues(mini, maxi)
+	self:UpdatePercent()
 end
 
 function barProto:UpdatePercent()
 	local percent = self:GetPercent()
-	if self.percent == percent then return end
-	self.percent = percent
+	if self._percent == percent then return end
+	self._percent = percent
 	if self.gradient then
 		self:UpdateColor()
 	end
