@@ -32,22 +32,28 @@ function healthBarProto:OnCreate(name, unit, order)
 	self.order = order
 	self.UnitNameText = true
 	self.CurrentText = true
+end
 
-	self:Hook('OnEnable', function(self)
-		self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
-		self:RegisterUnitEvent('UNIT_HEALTH_MAX', self.unit)
-	end)
-	self:Hook('OnDisable', function(self)
-		self:UnregisterEvent('UNIT_HEALTH', self.unit)
-		self:UnregisterEvent('UNIT_HEALTH_MAX', self.unit)
-	end)
+function healthBarProto:OnEnable()
+	self.super.OnEnable(self)
+	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
+	self:RegisterUnitEvent('UNIT_HEALTH_MAX', self.unit)
+end
 
-	self:Hook('OnShow', function(self)
-		self:RegisterUnitEvent('UNIT_HEALTH_FREQUENT', self.unit)
-	end)
-	self:Hook('OnHide', function(self)
-		self:UnregisterEvent('UNIT_HEALTH_FREQUENT')
-	end)
+function healthBarProto:OnShow()
+	self.super.OnShow(self)
+	self:UnregisterEvent('UNIT_HEALTH')
+	self:RegisterUnitEvent('UNIT_HEALTH_FREQUENT', self.unit)
+end
+
+function healthBarProto:OnHide()
+	self.super.OnHide(self)
+	self:UnregisterEvent('UNIT_HEALTH_FREQUENT')
+	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
+end
+
+function healthBarProto:GetCurrent()
+	return UnitHealth(self.unit)
 end
 
 function healthBarProto:GetCurrent()
