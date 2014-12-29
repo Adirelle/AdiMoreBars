@@ -80,8 +80,6 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	self.unit = unit
 	self.power = power
 	self.powerIndex = powerIndex or _G['SPELL_POWER_'..power]
-	self.showInCombat = true
-	self.showBelow = 0.9
 	self.order = order
 	self.CurrentText = true
 
@@ -139,4 +137,70 @@ function powerBarProto:UNIT_POWER_MAX(event, unit, power)
 	return self:UpdateMinMax()
 end
 
-powerBarClass:Create("Focus", "player", 10, "FOCUS")
+local playerClass = select(2, UnitClass("player"))
+local function IsA(class, ...) return playerClass == class or (... and IsA(...)) end
+
+if not IsA("WARRIOR", "DEATHKNIGHT", "HUNTER", "ROGUE") then
+	local manaBar = powerBarClass:Create("Mana", "player", 10, "MANA")
+	manaBar.showBelow = 0.98
+end
+
+if IsA("HUNTER") then
+	local focusBar = powerBarClass:Create("Focus", "player", 20, "FOCUS")
+	focusBar.showBelow = 0.95
+	focusBar.showInCombat = true
+
+elseif IsA("DEATHKNIGHT") then
+	local runicPowerBar = powerBarClass:Create("RunicPower", "player", 20, "RUNIC_POWER")
+	runicPowerBar.showInCombat = true
+	runicPowerBar.showAbove = 0
+
+elseif IsA("PALADIN") then
+	local holyPowerBar = powerBarClass:Create("HolyPower", "player", 20, "HOLY_POWER")
+	holyPowerBar.showInCombat = true
+	holyPowerBar.showAbove = 0
+
+elseif IsA("WARLOCK") then
+	local souldShardBar = powerBarClass:Create("SoulShards", "player", 20, "SOUL_SHARDS")
+	souldShardBar.showInCombat = true
+	souldShardBar.showAbove = 0
+
+	local burningEmberBar = powerBarClass:Create("BurningEmbers", "player", 20, "BURNING_EMBERS")
+	souldShardBar.showInCombat = true
+	souldShardBar.showAbove = 0
+
+	local demonicFuryBar = powerBarClass:Create("DemonicFury", "player", 20, "DEMONIC_FURY")
+	souldShardBar.showInCombat = true
+	souldShardBar.showAbove = 200
+
+elseif IsA("DRUID", "ROGUE", "MONK") then
+	local energyBar = powerBarClass:Create("Energy", "player", 20, "ENERGY")
+	energyBar.showBelow = 1
+	energyBar.showInCombat = not IsA("DRUID")
+end
+
+if IsA("DRUID", "WARRIOR") then
+	local rageBar = powerBarClass:Create("Rage", "player", 30, "RAGE")
+	rageBar.showAbove = 0
+	rageBar.showInCombat = IsA("WARRIOR")
+
+elseif IsA("MONK") then
+	local chiBar = powerBarClass:Create("Chi", "player", 30, "CHI")
+	chiBar.showAbove = 0
+	chiBar.showInCombat = true
+end
+
+if IsA("DRUID", "ROGUE") then
+	local comboBar = powerBarClass:Create("Combo", "player", 50, "COMBO", 4)
+	comboBar.showAbove = 0
+	comboBar.showInCombat = IsA("ROGUE")
+end
+
+if IsA("DRUID") then
+	local eclipseBar = powerBarClass:Create("Eclipse", "player", 40, "ECLIPSE")
+	eclipseBar.showInCombat = true
+	function eclipseBar:GetMinMax()
+		local maxi = UnitPowerMax(self.unit, self.powerIndex)
+		return -maxi, maxi
+	end
+end
