@@ -124,7 +124,11 @@ function powerBarProto:OnEnable()
 		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
 		self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
 	end
+	if self.onlyForSpecs then
+		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED')
+	end
 end
+powerBarProto.PLAYER_SPECIALIZATION_CHANGED = powerBarProto.UpdateVisibility
 
 function powerBarProto:OnShow()
 	super.OnShow(self)
@@ -143,7 +147,15 @@ function powerBarProto:OnHide()
 end
 
 function powerBarProto:IsAvailable()
-	return super.IsAvailable(self) and UnitPowerMax(self.unit, self.powerIndex) > 0
+	if not super.IsAvailable(self) or UnitPowerMax(self.unit, self.powerIndex) == 0 then
+		return false
+	end
+	if not self.onlyForSpecs then
+		return true
+	end
+	local specIndex = GetSpecialization()
+	local spec = specIndex and GetSpecializationInfo(specIndex)
+	return spec and self.onlyForSpecs[spec] or false
 end
 
 function powerBarProto:GetCurrent()
@@ -220,6 +232,9 @@ local function IsA(class, ...) return playerClass == class or (... and IsA(...))
 if not IsA("WARRIOR", "DEATHKNIGHT", "HUNTER", "ROGUE") then
 	local manaBar = powerBarClass:Create("Mana", "player", 10, "MANA")
 	manaBar.showBelow = 0.98
+	if IsA("MONK") then
+		manaBar.onlyForSpecs = { [270] = true } -- Mistweaver
+	end
 end
 
 if IsA("HUNTER") then
@@ -243,20 +258,30 @@ elseif IsA("WARLOCK") then
 	souldShardBar.segmented = 1
 	souldShardBar.showInCombat = true
 	souldShardBar.showAbove = 0
+	souldShardBar.onlyForSpecs = { [265] = true } -- Affliction Warlock
 
 	local burningEmberBar = powerBarClass:Create("BurningEmbers", "player", 20, "BURNING_EMBERS")
 	burningEmberBar.segmented = 10
 	burningEmberBar.showInCombat = true
 	burningEmberBar.showAbove = 0
+	burningEmberBar.onlyForSpecs = { [267] = true } -- Destruction Warlock
 
 	local demonicFuryBar = powerBarClass:Create("DemonicFury", "player", 20, "DEMONIC_FURY")
 	demonicFuryBar.showInCombat = true
 	demonicFuryBar.showAbove = 200
+	demonicFuryBar.onlyForSpecs = { [266] = true } -- Demonology Warlock
 
 elseif IsA("DRUID", "ROGUE", "MONK") then
 	local energyBar = powerBarClass:Create("Energy", "player", 20, "ENERGY")
 	energyBar.showBelow = 1
 	energyBar.showInCombat = not IsA("DRUID")
+	if IsA("MONK") then
+		energyBar.onlyForSpecs = {
+			[268] = true, -- Brewmaster
+			[269] = true, -- Windwalker
+		}
+	end
+
 end
 
 if IsA("DRUID", "WARRIOR") then
@@ -281,6 +306,8 @@ end
 if IsA("DRUID") then
 	local eclipseBar = powerBarClass:Create("Eclipse", "player", 40, "ECLIPSE")
 	eclipseBar.showInCombat = true
+	eclipseBar.onlyForSpecs = { [102] = true } -- Balance
+
 	function eclipseBar:GetMinMax()
 		local maxi = UnitPowerMax(self.unit, self.powerIndex)
 		return -maxi, maxi
