@@ -34,6 +34,10 @@ function healthBarProto:OnCreate(name, unit, order)
 	self.CurrentText = true
 end
 
+function healthBarProto:IsAvailable()
+	return self.super.IsAvailable(self) and (self.unit ~= "pet" or UnitExists("pet"))
+end
+
 function healthBarProto:GetLabel()
 	return UnitName(self.unit)
 end
@@ -44,7 +48,11 @@ function healthBarProto:OnEnable()
 	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
 	self:RegisterUnitEvent('UNIT_HEALTH_MAX', self.unit)
 	self:RegisterUnitEvent('UNIT_NAME', self.unit)
+	if self.unit == "pet" then
+		self:RegisterUnitEvent('UNIT_PET', "player")
+	end
 end
+healthBarProto.UNIT_PET = healthBarProto.UpdateVisibility
 
 function healthBarProto:OnShow()
 	self.super.OnShow(self)

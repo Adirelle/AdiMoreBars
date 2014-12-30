@@ -187,9 +187,6 @@ function barProto:OnEnable()
 		self:RegisterEvent('PLAYER_REGEN_DISABLED')
 		self:UpdateCombatStatus()
 	end
-	if self.unit == "pet" then
-		self:RegisterUnitEvent('UNIT_PET', 'player')
-	end
 	self:UpdateVisibility()
 end
 
@@ -235,7 +232,8 @@ function barProto:OnMinMaxChanged(mini, maxi)
 end
 
 function barProto:IsAvailable()
-	return self.unit ~= "pet" or UnitExists("pet")
+	return true
+end
 
 function barProto:GetLabel()
 	return self:GetName()
@@ -288,7 +286,6 @@ function barProto:UpdateVisibility()
 		self:SetScript('OnUpdate', self.OnUpdate)
 	end
 end
-barProto.UNIT_PET = barProto.UpdateVisibility
 
 function barProto:UpdateCombatStatus(event)
 	if not self.showInCombat then return end
