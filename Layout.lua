@@ -105,23 +105,6 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 		self.color = { pbc.r, pbc.g, pbc.b }
 	end
 
-	if power == "COMBO" then
-		self:Hook('OnEnable', function(self)
-			self:RegisterUnitEvent('UNIT_COMBO_POINTS', self.unit)
-		end)
-	else
-		self:Hook('OnEnable', function(self)
-			self:RegisterUnitEvent('UNIT_POWER', self.unit)
-			self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
-			self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
-		end)
-		self:Hook('OnShow', function(self)
-			self:RegisterUnitEvent('UNIT_POWER_FREQUENT', self.unit)
-		end)
-		self:Hook('OnHide', function(self)
-			self:UnregisterEvent('UNIT_POWER_FREQUENT')
-		end)
-	end
 end
 
 function powerBarProto:OnInitialize()
@@ -129,6 +112,33 @@ function powerBarProto:OnInitialize()
 
 	if self.segmented then
 		self.Separators = {}
+	end
+end
+
+function powerBarProto:OnEnable()
+	super.OnEnable(self)
+	if self.power == "COMBO" then
+		self:RegisterUnitEvent('UNIT_COMBO_POINTS', self.unit)
+	else
+		self:RegisterUnitEvent('UNIT_POWER', self.unit)
+		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
+		self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
+	end
+end
+
+function powerBarProto:OnShow()
+	super.OnShow(self)
+	if self.power ~= "COMBO" then
+		self:RegisterUnitEvent('UNIT_POWER_FREQUENT', self.unit)
+		self:UnregisterEvent('UNIT_POWER')
+	end
+end
+
+function powerBarProto:OnHide()
+	super.OnHide(self)
+	if self.power ~= "COMBO" then
+		self:RegisterUnitEvent('UNIT_POWER', self.unit)
+		self:UnregisterEvent('UNIT_POWER_FREQUENT', self.unit)
 	end
 end
 
