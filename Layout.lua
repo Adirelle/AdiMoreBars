@@ -98,6 +98,7 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 	self.powerIndex = powerIndex or _G['SPELL_POWER_'..power]
 	self.order = order
 	self.CurrentText = true
+	self.LabelText = true
 
 	local pbc = PowerBarColor[power] or PowerBarColor[self.powerIndex]
 	if pbc then
@@ -136,11 +137,15 @@ function powerBarProto:IsAvailable()
 end
 
 function powerBarProto:GetCurrent()
-	return UnitPower(self.unit, self.powerIndex)
+	return UnitPower(self.unit, self.powerIndex, true)
 end
 
 function powerBarProto:GetMinMax()
-	return 0, UnitPowerMax(self.unit, self.powerIndex)
+	return 0, UnitPowerMax(self.unit, self.powerIndex, true)
+end
+
+function powerBarProto:GetLabel()
+	return _G[self.power] or self.power
 end
 
 function powerBarProto:FullUpdate()
