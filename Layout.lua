@@ -235,13 +235,13 @@ elseif IsA("WARLOCK") then
 	souldShardBar.showAbove = 0
 
 	local burningEmberBar = powerBarClass:Create("BurningEmbers", "player", 20, "BURNING_EMBERS")
-	souldShardBar.segmented = 10
-	souldShardBar.showInCombat = true
-	souldShardBar.showAbove = 0
+	burningEmberBar.segmented = 10
+	burningEmberBar.showInCombat = true
+	burningEmberBar.showAbove = 0
 
 	local demonicFuryBar = powerBarClass:Create("DemonicFury", "player", 20, "DEMONIC_FURY")
-	souldShardBar.showInCombat = true
-	souldShardBar.showAbove = 200
+	demonicFuryBar.showInCombat = true
+	demonicFuryBar.showAbove = 200
 
 elseif IsA("DRUID", "ROGUE", "MONK") then
 	local energyBar = powerBarClass:Create("Energy", "player", 20, "ENERGY")
