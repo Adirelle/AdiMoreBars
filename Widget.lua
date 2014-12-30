@@ -58,7 +58,6 @@ end
 function barClass:SubClass()
 	local newClass, newProto = {}, {}
 
-	newProto.super = self.__index
 	newProto.class = newClass
 	setmetatable(newProto, { __index = self.__index })
 
@@ -66,7 +65,7 @@ function barClass:SubClass()
 	newClass.__index = newProto
 	setmetatable(newClass, { __index = self })
 
-	return newClass, newProto
+	return newClass, newProto, self.__index
 end
 
 local handlers = {

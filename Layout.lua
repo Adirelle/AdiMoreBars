@@ -21,10 +21,10 @@ along with AdiMoreBars.  If not, see <http://www.gnu.org/licenses/>.
 
 local addonName, addon = ...
 
-local healthBarClass, healthBarProto = addon.BarClass:SubClass()
+local healthBarClass, healthBarProto, super = addon.BarClass:SubClass()
 
 function healthBarProto:OnCreate(name, unit, order)
-	self.super.OnCreate(self, name)
+	super.OnCreate(self, name)
 
 	self.gradient = { 1, 0, 0, 1, 1, 0, 0, 1, 0 }
 	self.unit = unit
@@ -35,7 +35,7 @@ function healthBarProto:OnCreate(name, unit, order)
 end
 
 function healthBarProto:IsAvailable()
-	return self.super.IsAvailable(self) and (self.unit ~= "pet" or UnitExists("pet"))
+	return super.IsAvailable(self) and (self.unit ~= "pet" or UnitExists("pet"))
 end
 
 function healthBarProto:GetLabel()
@@ -44,7 +44,7 @@ end
 healthBarProto.UNIT_NAME = healthBarProto.UpdateLabel
 
 function healthBarProto:OnEnable()
-	self.super.OnEnable(self)
+	super.OnEnable(self)
 	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
 	self:RegisterUnitEvent('UNIT_HEALTH_MAX', self.unit)
 	self:RegisterUnitEvent('UNIT_NAME', self.unit)
@@ -55,13 +55,13 @@ end
 healthBarProto.UNIT_PET = healthBarProto.UpdateVisibility
 
 function healthBarProto:OnShow()
-	self.super.OnShow(self)
+	super.OnShow(self)
 	self:UnregisterEvent('UNIT_HEALTH')
 	self:RegisterUnitEvent('UNIT_HEALTH_FREQUENT', self.unit)
 end
 
 function healthBarProto:OnHide()
-	self.super.OnHide(self)
+	super.OnHide(self)
 	self:UnregisterEvent('UNIT_HEALTH_FREQUENT')
 	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
 end
@@ -88,10 +88,10 @@ end
 healthBarClass:Create("PlayerHealth", "player", -10)
 healthBarClass:Create("PetHealth", "pet", -20)
 
-local powerBarClass, powerBarProto = addon.BarClass:SubClass()
+local powerBarClass, powerBarProto, super = addon.BarClass:SubClass()
 
 function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
-	self.super.OnCreate(self, name)
+	super.OnCreate(self, name)
 
 	self.unit = unit
 	self.power = power
@@ -125,7 +125,7 @@ function powerBarProto:OnCreate(name, unit, order, power, powerIndex)
 end
 
 function powerBarProto:OnInitialize()
-	self.super.OnInitialize(self)
+	super.OnInitialize(self)
 
 	if self.segmented then
 		self.Separators = {}
@@ -133,7 +133,7 @@ function powerBarProto:OnInitialize()
 end
 
 function powerBarProto:IsAvailable()
-	return self.super.IsAvailable(self) and UnitPowerMax(self.unit, self.powerIndex) > 0
+	return super.IsAvailable(self) and UnitPowerMax(self.unit, self.powerIndex) > 0
 end
 
 function powerBarProto:GetCurrent()
@@ -149,7 +149,7 @@ function powerBarProto:GetLabel()
 end
 
 function powerBarProto:FullUpdate()
-	self.super.FullUpdate(self)
+	super.FullUpdate(self)
 	self:UpdateSeparators()
 end
 
@@ -158,7 +158,7 @@ function powerBarProto:OnSizeChanged()
 end
 
 function powerBarProto:OnMinMaxChanged(mini, maxi)
-	self.super.OnMinMaxChanged(self, mini, maxi)
+	super.OnMinMaxChanged(self, mini, maxi)
 	self:UpdateSeparators()
 end
 
