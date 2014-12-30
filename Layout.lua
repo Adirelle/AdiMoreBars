@@ -30,14 +30,20 @@ function healthBarProto:OnCreate(name, unit, order)
 	self.unit = unit
 	self.showBelow = 0.9
 	self.order = order
-	self.UnitNameText = true
+	self.LabelText = true
 	self.CurrentText = true
 end
+
+function healthBarProto:GetLabel()
+	return UnitName(self.unit)
+end
+healthBarProto.UNIT_NAME = healthBarProto.UpdateLabel
 
 function healthBarProto:OnEnable()
 	self.super.OnEnable(self)
 	self:RegisterUnitEvent('UNIT_HEALTH', self.unit)
 	self:RegisterUnitEvent('UNIT_HEALTH_MAX', self.unit)
+	self:RegisterUnitEvent('UNIT_NAME', self.unit)
 end
 
 function healthBarProto:OnShow()

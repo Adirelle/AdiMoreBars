@@ -118,13 +118,11 @@ end
 function barProto:OnInitialize()
 	self:Debug('OnInitialize')
 
-	if self.UnitNameText and self.unit then
-		local text = self:CreateFontString(self:GetName().."UnitName", "OVERLAY")
+	if self.LabelText then
+		local text = self:CreateFontString(self:GetName().."Label", "OVERLAY")
 		text:SetPoint("LEFT", PADDING, 0)
 		addon:RegisterLSMCallback(text, "font", SetFont)
-		self.UnitNameText = text
-	else
-		self.UnitNameText = nil
+		self.LabelText = text
 	end
 
 	if self.MaximumText then
@@ -192,9 +190,6 @@ function barProto:OnEnable()
 	if self.unit == "pet" then
 		self:RegisterUnitEvent('UNIT_PET', 'player')
 	end
-	if self.UnitNameText and self.unit then
-		self:RegisterUnitEvent('UNIT_NAME', self.unit)
-	end
 	self:UpdateVisibility()
 end
 
@@ -241,6 +236,9 @@ end
 
 function barProto:IsAvailable()
 	return self.unit ~= "pet" or UnitExists("pet")
+
+function barProto:GetLabel()
+	return self:GetName()
 end
 
 function barProto:GetCurrent()
@@ -273,12 +271,11 @@ function barProto:UpdateColor()
 	end
 end
 
-function barProto:UpdateName()
-	if self.UnitNameText then
-		self.UnitNameText:SetText(UnitName(self.unit))
+function barProto:UpdateLabel()
+	if self.LabelText then
+		self.LabelText:SetText(self:GetLabel())
 	end
 end
-barProto.UNIT_NAME = barProto.UpdateName
 
 function barProto:UpdateVisibility()
 	self.shouldShow = self:IsAvailable() and self:CheckVisibility()
@@ -344,7 +341,7 @@ end
 function barProto:FullUpdate()
 	self:Debug('FullUpdate')
 	self:UpdateTexture()
-	self:UpdateName()
+	self:UpdateLabel()
 	self:UpdateMinMax()
 	self:UpdateCurrent()
 end
