@@ -62,10 +62,6 @@ function healthBarProto:GetCurrent()
 	return UnitHealth(self.unit)
 end
 
-function healthBarProto:GetCurrent()
-	return UnitHealth(self.unit)
-end
-
 function healthBarProto:GetMinMax()
 	return 0, UnitHealthMax(self.unit)
 end
