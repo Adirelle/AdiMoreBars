@@ -87,7 +87,7 @@ function barProto:OnCreate(name)
 		self:SetScript(name, handler)
 	end
 
-	local width, height = 150, 20
+	local width, height = 350, 24
 	self:SetSize(width, height)
 	self:SetBackdrop(BAR_BACKDROP)
 	self:SetBackdropColor(0, 0, 0, 1)

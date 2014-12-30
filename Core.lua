@@ -35,7 +35,7 @@ local SPACING = 4
 
 local anchor = CreateFrame("Frame", addonName.."Anchor", UIParent)
 anchor:SetPoint("CENTER", 0, -100)
-anchor:SetSize(150, 20)
+anchor:SetSize(350, 24)
 anchor:Hide()
 addon.Anchor = anchor
 
