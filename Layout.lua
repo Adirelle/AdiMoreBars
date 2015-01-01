@@ -122,8 +122,10 @@ function powerBarProto:OnEnable()
 	else
 		self:RegisterUnitEvent('UNIT_POWER', self.unit)
 		self:RegisterUnitEvent('UNIT_POWER_MAX', self.unit)
-		self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
 	end
+	self:RegisterUnitEvent('UNIT_DISPLAYPOWER', self.unit)
+	self:RegisterUnitEvent('UNIT_POWER_BAR_SHOW', self.unit)
+	self:RegisterUnitEvent('UNIT_POWER_BAR_HIDE', self.unit)
 	if self.onlyForSpecs then
 		self:RegisterEvent('PLAYER_SPECIALIZATION_CHANGED')
 	end
@@ -211,6 +213,8 @@ end
 function powerBarProto:UNIT_DISPLAYPOWER()
 	return self:UpdateVisibility()
 end
+powerBarProto.UNIT_POWER_BAR_SHOW = powerBarProto.UNIT_DISPLAYPOWER
+powerBarProto.UNIT_POWER_BAR_HIDE = powerBarProto.UNIT_DISPLAYPOWER
 
 function powerBarProto:UNIT_POWER(event, unit, power)
 	if power and power ~= self.power then return end
@@ -312,4 +316,28 @@ if IsA("DRUID") then
 		local maxi = UnitPowerMax(self.unit, self.powerIndex)
 		return -maxi, maxi
 	end
+end
+
+local alternateBar = powerBarClass:Create("Alternate", "player", 50, "ALTERNATE", ALTERNATE_POWER_INDEX)
+alternateBar.color = { 1, 1, 1 }
+
+function alternateBar:IsAvailable()
+	if not powerBarProto.IsAvailable(self) then
+		return false
+	end
+	return not not UnitAlternatePowerInfo(self.unit)
+end
+
+function alternateBar:GetMinMax()
+	return select(2, UnitAlternatePowerInfo(self.unit)), UnitPowerMax(self.unit, self.powerIndex)
+end
+
+function alternateBar:UpdateColor()
+	local c = self.color
+	c[1], c[2], c[3] = select(2, UnitAlternatePowerTextureInfo(self.unit, 2))
+	powerBarProto.UpdateColor(self)
+end
+
+function alternateBar:GetLabel()
+	return (select(10, UnitAlternatePowerInfo(self.unit)))
 end

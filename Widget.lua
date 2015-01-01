@@ -318,20 +318,29 @@ function barProto:OnUpdate(elapsed)
 end
 
 function barProto:CheckVisibility()
+	local visible = true
 	if self.showInCombat and self.inCombat then
-		self:Debug('CheckVisibility', inCombat)
-		return true
+		if self.inCombat then
+			return true
+		else
+			visible = false
+		end
 	end
-	if self.showBelow and self:GetPercent() < self.showBelow then
-		self:Debug('CheckVisibility', self:GetPercent(), 'below', self.showBelow)
-		return true
+	if self.showBelow then
+		if self:GetPercent() < self.showBelow then
+			return true
+		else
+			visible = false
+		end
 	end
-	if self.showAbove and self:GetCurrent() > self.showAbove then
-		self:Debug('CheckVisibility', self:GetCurrent(), 'above', self.showAbove)
-		return true
+	if self.showAbove then
+		if self:GetCurrent() > self.showAbove then
+			return true
+		else
+			visible = false
+		end
 	end
-	self:Debug('CheckVisibility', 'nothing')
-	return false
+	return visible
 end
 
 function barProto:FullUpdate()
