@@ -1,0 +1,9 @@
+[submodule "libs/LibStub"]
+	path = libs/LibStub
+	url = https://github.com/wowace-mirror/LibStub.git
+[submodule "libs/CallbackHandler-1.0"]
+	path = libs/CallbackHandler-1.0
+	url = https://github.com/wowace-mirror/CallbackHandler-1.0.git
+[submodule "libs/LibDualSpec-1.0"]
+	path = libs/LibDualSpec-1.0
+	url = ../LibDualSpec-1.0
